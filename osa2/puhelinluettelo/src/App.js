@@ -10,6 +10,21 @@ const Filter = ({ text, value, onChange }) => (
     /></p>
 )
 
+const Persons = ({ personsToShow, remover }) => {
+
+  const Person = ({ person }) =>
+    <p>
+      {person.name} {person.number} <button onClick={() => remover(person)}>
+        poista
+  </button></p>
+
+  return personsToShow.map(person =>
+    <Person person={person}
+      key={person.id} />
+  )
+}
+
+
 const PersonForm = ({ form }) => (
   <form onSubmit={form.onSubmit}>
     <div>
@@ -50,11 +65,7 @@ const App = () => {
       })
   }, [])
 
-  const Person = ({ person }) =>
-    <p>
-      {person.name} {person.number} <button onClick={() => handleRemovePerson(person)}>
-        poista
-  </button></p>
+  
 
   const Notification = ({ message, className }) => {
     if (message === null) {
@@ -191,10 +202,8 @@ const App = () => {
       <h2>lisää uusi</h2>
       <PersonForm form={form} />
       <h2>Numerot</h2>
-      {personsToShow.map(person =>
-        <Person person={person}
-          key={person.id} />
-      )}
+      <Persons personsToShow={personsToShow} remover={handleRemovePerson} />
+
     </div>
   )
 
