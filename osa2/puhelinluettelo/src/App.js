@@ -1,49 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import yllapito from './services/yllapito'
 import './index.css'
-
-const Filter = ({ text, value, onChange }) => (
-  <p>{text}
-    <input
-      value={value}
-      onChange={onChange}
-    /></p>
-)
-
-const Persons = ({ personsToShow, remover }) => {
-
-  const Person = ({ person }) =>
-    <p>
-      {person.name} {person.number} <button onClick={() => remover(person)}>
-        poista
-  </button></p>
-
-  return personsToShow.map(person =>
-    <Person person={person}
-      key={person.id} />
-  )
-}
-
-
-const PersonForm = ({ form }) => (
-  <form onSubmit={form.onSubmit}>
-    <div>
-      nimi: <input
-        value={form.nameValue}
-        onChange={form.nameOnChange}
-      />
-    </div>
-    <div>
-      numero: <input
-        value={form.numberValue}
-        onChange={form.numberOnChange}
-      />
-    </div>
-    <div>
-      <button type="submit">lisää</button>
-    </div>
-  </form>
-)
+import Persons from './services/persons'
+import PersonForm from './services/personForm'
+import Filter from './services/filter'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -65,8 +25,6 @@ const App = () => {
       })
   }, [])
 
-  
-
   const Notification = ({ message, className }) => {
     if (message === null) {
       return null
@@ -84,82 +42,80 @@ const App = () => {
       yllapito
         .remove(person)
         .then(promise => {
-          refreshList()
-          setNotificationMsg(`Poistettiin ${person.name}`)
-          setTimeout(() => {
-            setNotificationMsg(null)
-          }, 3000)
+          handleNotification(`Poistettiin ${person.name}`, 'info')
         })
         .catch(error => {
-          setErrorNotificationMsg(`Henkilö ${person.name} on jo poistettu`)
-          setTimeout(() => {
-            setErrorNotificationMsg(null)
-          }, 3000)
-          console.log(error)
-          refreshList()
+          handleNotification(`Henkilö ${person.name} on jo poistettu`, 'error', error)
         })
+        removePersonFromList(person.name)
     }
+  }
+
+  const handleNotification = (message, type, error) => {
+    if (type === 'info') {
+      setNotificationMsg(message)
+      setTimeout(() => {
+        setNotificationMsg(null)
+      }, 3000)
+    }
+    if (type === 'error') {
+      setErrorNotificationMsg(message)
+      setTimeout(() => {
+        setErrorNotificationMsg(null)
+      }, 3000)
+      console.log(error)
+    }
+  }
+
+  const update = (changedPerson) => {
+    yllapito
+      .update(changedPerson)
+      .then(returnedPerson => {
+        setPersons(persons.map(person => person.name !== changedPerson.name ? person : returnedPerson))
+        handleNotification(`Muutettiin henkilön ${newName} puhelinnumeroa`, 'info')
+      })
+      .catch(error => {
+        handleNotification(`Henkilöä ${newName} ei löydy`, 'error', error)
+        removePersonFromList(newName)
+      })
+  }
+
+  const createNew = () => {
+    const newPerson = {
+      name: newName,
+      number: newNumber,
+      id: persons[persons.length - 1].id + 1,
+    }
+    yllapito
+      .create(newPerson)
+      .then(person => {
+        setPersons(persons.concat(person))
+        handleNotification(`Lisättiin ${person.name}`, 'info')
+      })
+      .catch(error => {
+        if (newPerson.name.length < 3 || newPerson.number.length < 8) {
+          handleNotification(`Nimen tulee olla vähintään 3 kirjainta ja puhelinnumeron 8 numeroa pitkä`, 'error', error)
+        } else {
+          handleNotification(`Henkilön ${newPerson.name} lisäys epäonnistui`, 'error', error)
+        }
+      })
   }
 
   const addPerson = (event) => {
     event.preventDefault()
-    var nameIsNotListed = true
-
-    const newPerson = {
-      name: newName,
-      number: newNumber,
-
-      id: persons[persons.length - 1].id + 1,
-    }
-    persons.forEach(person => {
-      if (person.name === newPerson.name) {
-        if (window.confirm(`${person.name} on jo luettelossa, korvataanko vanha numero uudella?`)) {
-          const changedPerson = { ...person, number: newPerson.number }
-          yllapito
-            .update(changedPerson)
-            .then(returnedPerson => {
-              setPersons(persons.map(person => person.name !== changedPerson.name ? person : returnedPerson))
-              setNotificationMsg(`Muutettiin henkilön ${person.name} puhelinnumeroa`)
-              setTimeout(() => {
-                setNotificationMsg(null)
-              }, 3000)
-            })
-            .catch(error => {
-              setErrorNotificationMsg(`Henkilöä ${person.name} ei löydy`)
-              setTimeout(() => {
-                setErrorNotificationMsg(null)
-              }, 3000)
-              console.log(error)
-              refreshList()
-            })
-
-
-        }
-        nameIsNotListed = false
+    const oldPerson = persons.filter(person => person.name === newName)
+    if (oldPerson.length === 1) {
+      if (window.confirm(`${newName} on jo luettelossa, korvataanko vanha numero uudella?`)) {
+        const changedPerson = { ...oldPerson[0], number: newNumber }
+        update(changedPerson)
       }
-    })
-    if (nameIsNotListed) {
-      yllapito
-        .create(newPerson)
-        .then(person => {
-          setPersons(persons.concat(person))
-          setNewName('')
-          setNewNumber('')
-          setNotificationMsg(`Lisättiin ${person.name}`)
-          setTimeout(() => {
-            setNotificationMsg(null)
-          }, 3000)
-        })
-        .catch(error => {
-          setErrorNotificationMsg(`Henkilön ${newPerson.name} lisäys epäonnistui`)
-          setTimeout(() => {
-            setErrorNotificationMsg(null)
-          }, 3000)
-          console.log(error)
-          refreshList()
-        })
+    } else {
+      createNew()
     }
+    setNewName('')
+    setNewNumber('')
   }
+
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -174,12 +130,8 @@ const App = () => {
   const personsToShow = persons.filter(person =>
     person.name.toLowerCase().includes(newFilter.toLowerCase()))
 
-  const refreshList = () => {
-    yllapito
-      .getAll()
-      .then(initialPersons => {
-        setPersons(initialPersons)
-      })
+  const removePersonFromList = (name) => {
+    setPersons(persons.filter(person => person.name !== name))
   }
 
   const form = {
@@ -203,10 +155,8 @@ const App = () => {
       <PersonForm form={form} />
       <h2>Numerot</h2>
       <Persons personsToShow={personsToShow} remover={handleRemovePerson} />
-
     </div>
   )
-
 }
 
 export default App
