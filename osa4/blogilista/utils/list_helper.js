@@ -33,12 +33,8 @@ const mostBlogs = (blogs) => {
   const blogsCount = _.countBy(blogs, 'author')
   const blogsCountAsArray = _.toPairs(blogsCount)
   const arrayBestPair = blogsCountAsArray.reduce((maxPair, pair) => maxPair[1] > pair[1] ? maxPair : pair, [])
-  const bestPair = Object.assign({}, arrayBestPair)
-  bestPair['author'] = bestPair[0]
-  bestPair['blogs'] = bestPair[1]
-  delete bestPair[0]
-  delete bestPair[1]
-  return bestPair
+
+  return { author: arrayBestPair[0], blogs: arrayBestPair[1] }
 }
 
 const mostLikes = (blogs) => {
