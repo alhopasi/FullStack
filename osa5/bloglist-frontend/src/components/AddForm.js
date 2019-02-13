@@ -1,38 +1,44 @@
 import React from 'react'
 
-const AddForm = ({ addForm }) => (
-
-    <form onSubmit={addForm.onSubmit} >
+const AddForm = ({
+  onSubmit,
+  newTitle,
+  onTitleChange,
+  newAuthor,
+  onAuthorChange,
+  newUrl,
+  onUrlChange
+}) => (
+    <form onSubmit={onSubmit} >
       <div>
         title:
     <input
           type="text"
-          value={addForm.newTitle}
+          value={newTitle}
           name="title"
-          onChange={addForm.onTitleChange}
+          onChange={onTitleChange}
         />
       </div>
       <div>
         author:
     <input
           type="text"
-          value={addForm.newAuthor}
+          value={newAuthor}
           name="author"
-          onChange={addForm.onAuthorChange}
+          onChange={onAuthorChange}
         />
       </div>
       <div>
         url:
     <input
           type="text"
-          value={addForm.newUrl}
+          value={newUrl}
           name="url"
-          onChange={addForm.onUrlChange}
+          onChange={onUrlChange}
         />
       </div>
       <button type="submit">create</button>
     </form>
-
-)
+  )
 
 export default AddForm 

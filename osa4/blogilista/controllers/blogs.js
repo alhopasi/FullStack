@@ -42,7 +42,12 @@ blogsRouter.post('/', async (request, response, next) => {
     if (body.likes === undefined) {
       body['likes'] = 0
     }
-    if (body.title === undefined || body.url === undefined) {
+    if (body.title === undefined
+      || body.title === ''
+      || body.url === undefined
+      || body.url === ''
+      || body.author === undefined
+      || body.author === '') {
       return response.status(400).json({ error: 'content missing' })
     }
 
@@ -55,10 +60,10 @@ blogsRouter.post('/', async (request, response, next) => {
       user: user._id,
       likes: body.likes
     })
-
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
+
     response.status(201).json(savedBlog)
   } catch (exception) {
     next(exception)
@@ -67,15 +72,15 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.put('/:id', async (request, response) => {
   const body = request.body
-
   const blog = {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes
+    user: body.user,
+    likes: body.likes,
   }
 
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true }).populate('user')
   response.json(updatedBlog)
 })
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import AddForm from './components/AddForm'
+import LoginForm from './components/LoginForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './index.css'
@@ -15,6 +16,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [notificationMsg, setNotificationMsg] = useState(null)
   const [errorNotificationMsg, setErrorNotificationMsg] = useState(null)
+  const [loginVisible, setLoginVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -64,42 +66,53 @@ const App = () => {
 
     try {
       const blog = await blogService.create(blogObject)
-    setNewTitle('')
-    setNewAuthor('')
-    setNewUrl('')
-    setBlogs(blogs.concat(blog))
-    handleNotification(`a new blog ${blog.title} by ${blog.author} added`, 'info')
+      setNewTitle('')
+      setNewAuthor('')
+      setNewUrl('')
+      setBlogs(blogs.concat(blog))
+      handleNotification(`a new blog ${blog.title} by ${blog.author} added`, 'info')
     } catch (exception) {
       handleNotification(`error adding a new blog`, 'error', exception.message)
     }
   }
 
-  const loginForm = () => (
-    <div>
-      <h2>Log in to application</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          username
-        <input
-            type="text"
-            value={username}
-            name="Username"
-            onChange={({ target }) => setUsername(target.value)}
-          />
+  const handleAddLike = async (blog) => {
+    const blogObject = {
+      ...blog,
+      user: blog.user[0].id,
+      likes: blog.likes + 1
+    }
+    try {
+      const returnedBlog = await blogService.update(blogObject)
+      setBlogs(blogs.map(oldBlog => oldBlog.id !== blog.id ? oldBlog : returnedBlog))
+      handleNotification(`liked ${blog.title} by ${blog.author}`, 'info')
+    } catch (exception) {
+      handleNotification(`like rejected for unknown reason`, 'error', exception.message)
+    }
+  }
+
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
+    const showWhenVisible = { display: loginVisible ? '' : 'none' }
+
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>log in</button>
         </div>
-        <div>
-          password
-        <input
-            type="password"
-            value={password}
-            name="Password"
-            onChange={({ target }) => setPassword(target.value)}
+        <div style={showWhenVisible}>
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
           />
+          <button onClick={() => setLoginVisible(false)}>cancel</button>
         </div>
-        <button type="submit">login</button>
-      </form>
-    </div>
-  )
+      </div>
+    )
+  }
 
   const handleTitleChange = (event) => {
     setNewTitle(event.target.value)
@@ -111,16 +124,17 @@ const App = () => {
     setNewUrl(event.target.value)
   }
 
-  const addForm = {
-    onSubmit: handleAddNewBlog,
-    newTitle: newTitle,
-    onTitleChange: handleTitleChange,
-    newAuthor: newAuthor,
-    onAuthorChange: handleAuthorChange,
-    newUrl: newUrl,
-    onUrlChange: handleUrlChange
-  }
-
+  const addForm = () => (
+    <AddForm
+      onSubmit={handleAddNewBlog}
+      newTitle={newTitle}
+      onTitleChange={handleTitleChange}
+      newAuthor={newAuthor}
+      onAuthorChange={handleAuthorChange}
+      newUrl={newUrl}
+      onUrlChange={handleUrlChange}
+    />
+  )
 
   const blogForm = () => (
     <div>
@@ -128,10 +142,10 @@ const App = () => {
       <p>{user.name} logged in</p>
       <button type="submit" onClick={handleLogout}>logout</button>
       <h2>create new</h2>
-      <AddForm addForm={addForm} />
+      {addForm()}
 
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} addLike={handleAddLike} />
       )}
     </div>
   )
