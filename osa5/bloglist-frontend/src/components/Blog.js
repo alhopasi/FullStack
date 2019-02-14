@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-
-
 const Blog = ({ blog, likeHandler, removeHandler, user }) => {
   const [visible, setVisible] = useState(false)
   const [removeButtonVisible, setRemoveButtonVisible] = useState(false)
@@ -14,7 +12,6 @@ const Blog = ({ blog, likeHandler, removeHandler, user }) => {
     borderWidth: 1,
     marginBottom: 5
   }
-
 
   const showWhenVisible = { display: removeButtonVisible ? '' : 'none' }
 
@@ -40,7 +37,9 @@ const Blog = ({ blog, likeHandler, removeHandler, user }) => {
         <div><a href={blog.url}>{blog.url}</a></div>
         <div>{blog.likes} likes <button onClick={() => likeHandler(blog)}>like</button></div>
         <div>added by {blog.user[0].name}</div>
-        <div style={showWhenVisible}><button onClick={() => removeHandler(blog)}>remove</button></div>
+        <div style={showWhenVisible} className="togglableContent">
+          <button onClick={() => removeHandler(blog)}>remove</button>
+        </div>
       </div>
     )
   }
