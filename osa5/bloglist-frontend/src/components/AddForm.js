@@ -8,37 +8,35 @@ const AddForm = ({
   onAuthorChange,
   newUrl,
   onUrlChange
-}) => (
-    <form onSubmit={onSubmit} >
-      <div>
-        title:
+}) => (<form onSubmit={onSubmit} >
+  <div>
+    title:
     <input
-          type="text"
-          value={newTitle}
-          name="title"
-          onChange={onTitleChange}
-        />
-      </div>
-      <div>
-        author:
+      type="text"
+      value={newTitle}
+      name="title"
+      onChange={onTitleChange}
+    />
+  </div>
+  <div>
+    author:
     <input
-          type="text"
-          value={newAuthor}
-          name="author"
-          onChange={onAuthorChange}
-        />
-      </div>
-      <div>
-        url:
+      type="text"
+      value={newAuthor}
+      name="author"
+      onChange={onAuthorChange}
+    />
+  </div>
+  <div>
+    url:
     <input
-          type="text"
-          value={newUrl}
-          name="url"
-          onChange={onUrlChange}
-        />
-      </div>
-      <button type="submit">create</button>
-    </form>
-  )
+      type="text"
+      value={newUrl}
+      name="url"
+      onChange={onUrlChange}
+    />
+  </div>
+  <button type="submit">create</button>
+</form>)
 
-export default AddForm 
+export default AddForm

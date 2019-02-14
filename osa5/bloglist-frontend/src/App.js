@@ -47,7 +47,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      handleNotification(`Wrong username or password`, 'error', exception.message)
+      handleNotification('Wrong username or password', 'error', exception.message)
     }
   }
 
@@ -72,7 +72,7 @@ const App = () => {
       setBlogs(blogs.concat(blog))
       handleNotification(`a new blog ${blog.title} by ${blog.author} added`, 'info')
     } catch (exception) {
-      handleNotification(`error adding a new blog`, 'error', exception.message)
+      handleNotification('error adding a new blog', 'error', exception.message)
     }
   }
 
@@ -87,7 +87,19 @@ const App = () => {
       setBlogs(blogs.map(oldBlog => oldBlog.id !== blog.id ? oldBlog : returnedBlog))
       handleNotification(`liked ${blog.title} by ${blog.author}`, 'info')
     } catch (exception) {
-      handleNotification(`like rejected for unknown reason`, 'error', exception.message)
+      handleNotification('like rejected for unknown reason', 'error', exception.message)
+    }
+  }
+
+  const handleRemove = async (blog) => {
+    if (window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        await blogService.remove(blog)
+        handleNotification(`removed ${blog.title} by ${blog.author}`, 'info')
+        setBlogs(blogs.filter(oldBlog => oldBlog.id !== blog.id))
+      } catch (exception) {
+        handleNotification('Remove failed: Only adder can remove blogs', 'error', exception.message)
+      }
     }
   }
 
@@ -136,19 +148,32 @@ const App = () => {
     />
   )
 
-  const blogForm = () => (
-    <div>
-      <h2>blogs</h2>
-      <p>{user.name} logged in</p>
-      <button type="submit" onClick={handleLogout}>logout</button>
-      <h2>create new</h2>
-      {addForm()}
+  const blogForm = () => {
+    const compare = (blog1, blog2) => {
+      if (blog1.likes < blog2.likes) return 1
+      if (blog1.likes > blog2.likes) return -1
+      return 0
+    }
+    blogs.sort(compare)
+    return (
+      <div>
+        <h2>blogs</h2>
+        <p>{user.name} logged in</p>
+        <button type="submit" onClick={handleLogout}>logout</button>
+        <h2>create new</h2>
+        {addForm()}
 
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} addLike={handleAddLike} />
-      )}
-    </div>
-  )
+        {blogs.map(blog =>
+          <Blog
+            key={blog.id}
+            blog={blog}
+            likeHandler={handleAddLike}
+            removeHandler={handleRemove}
+            user={user} />
+        )}
+      </div>
+    )
+  }
 
   const Notification = ({ message, className }) => {
     if (message === null) {

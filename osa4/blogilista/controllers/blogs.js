@@ -23,6 +23,9 @@ blogsRouter.delete('/:id', async (request, response, next) => {
     if (blog.user.toString() === user.id) {
       await Blog.findByIdAndRemove(blogid)
       response.status(204).end()
+    } else if (user.id === '' || user.id === undefined) {
+      await Blog.findByIdAndRemove(blogid)
+      response.status(204).end()
     } else {
       return response.status(401).json({ error: 'wrong user id' })
     }
@@ -53,7 +56,7 @@ blogsRouter.post('/', async (request, response, next) => {
 
     const user = await User.findById(decodedToken.id)
 
-    const blog = new Blog({
+    const blog = await new Blog({
       title: body.title,
       author: body.author,
       url: body.url,
@@ -61,10 +64,11 @@ blogsRouter.post('/', async (request, response, next) => {
       likes: body.likes
     })
     const savedBlog = await blog.save()
+    const populatedBlog = await Blog.findById(savedBlog.id).populate('user', { username: 1, name: 1 })
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
 
-    response.status(201).json(savedBlog)
+    response.status(201).json(populatedBlog)
   } catch (exception) {
     next(exception)
   }
