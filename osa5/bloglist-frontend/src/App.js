@@ -5,6 +5,7 @@ import LoginForm from './components/LoginForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './index.css'
+import { useField } from './hooks'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -12,11 +13,11 @@ const App = () => {
   const [newAuthor, setNewAuthor] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [user, setUser] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [notificationMsg, setNotificationMsg] = useState(null)
   const [errorNotificationMsg, setErrorNotificationMsg] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
+  const usernameForm = useField('text')
+  const passwordForm = useField('password')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -35,6 +36,8 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault()
+    const username = usernameForm.value
+    const password = passwordForm.value
     try {
       const user = await loginService.login({
         username, password
@@ -44,8 +47,8 @@ const App = () => {
       )
       blogService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
+      usernameForm.reset()
+      passwordForm.reset()
     } catch (exception) {
       handleNotification('Wrong username or password', 'error', exception.message)
     }
@@ -114,11 +117,9 @@ const App = () => {
         </div>
         <div style={showWhenVisible}>
           <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
             handleSubmit={handleLogin}
+            usernameFormInput={usernameForm}
+            passwordFormInput={passwordForm}
           />
           <button onClick={() => setLoginVisible(false)}>cancel</button>
         </div>
