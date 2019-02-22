@@ -1,14 +1,14 @@
 import React from 'react'
 import { voteAnecdote } from '../reducers/anecdoteReducer'
-import { newNotification } from '../reducers/notificationReducer'
+import { setNotification } from '../reducers/notificationReducer'
 import { connect } from 'react-redux'
 
 const AnecdoteList = (props) => {
 
   const vote = (id) => {
     const votedAnecdote = props.anecdotesToShow().find(a => a.id === id)
-    props.voteAnecdote(id)
-    props.newNotification(`you voted '${votedAnecdote.content}'`)
+    props.voteAnecdote(votedAnecdote)
+    props.setNotification(`you voted '${votedAnecdote.content}'`, 10)
   }
   
   return (
@@ -27,7 +27,6 @@ const AnecdoteList = (props) => {
 }
 
 const mapStateToProps = (state) => {
-  console.log(state)
    const anecdotesToShow = () => {
     const anecdotes = state.anecdotes
     anecdotes.sort((a, b) => b.votes - a.votes)
@@ -43,7 +42,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   voteAnecdote,
-  newNotification
+  setNotification
 }
 
 const ConnectedAnecdotes = connect(
