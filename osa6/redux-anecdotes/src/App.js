@@ -21,5 +21,6 @@ const App = (props) => {
     </div>
   )
 }
+
 const connectedApp = connect(null, { initializeAnecdotes })(App)
 export default connectedApp

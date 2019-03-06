@@ -94,5 +94,5 @@ const mapDispatchToProps = {
   setNotification
 }
 
-const connectedApp = connect(null, { mapDispatchToProps })(App)
+const connectedApp = connect(null, mapDispatchToProps )(App)
 export default connectedApp

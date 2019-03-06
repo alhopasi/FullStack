@@ -1,9 +1,8 @@
-import React from 'react';
+import React from 'react'
 import { setNotification } from '../reducers/notificationReducer'
 import { connect } from 'react-redux'
 
-const Notification = ( props ) => {
-
+const Notification = (props) => {
   const notification = props.notification
 
   const style = {
@@ -39,5 +38,5 @@ const mapDispatchToProps = {
 const ConnectedNotification = connect(
   mapStateToProps,
   mapDispatchToProps
-  )(Notification)
+)(Notification)
 export default ConnectedNotification
