@@ -1,24 +1,19 @@
 import React from 'react'
 import { setNotification } from '../reducers/notificationReducer'
 import { connect } from 'react-redux'
+import { Message } from 'semantic-ui-react'
 
 const Notification = (props) => {
   const notification = props.notification
-
-  const style = {
-    border: 'solid',
-    padding: 10,
-    borderWidth: 1
-  }
 
   if (notification.data !== null) {
     setTimeout(() => {
       props.setNotification(null)
     }, notification.duration)
     return (
-      <div style={style}>
+      <Message success>
         {notification.data}
-      </div>
+      </Message>
     )
   } else {
     return <div></div>

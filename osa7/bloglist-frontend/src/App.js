@@ -18,7 +18,7 @@ import BlogInfo from './components/BlogInfo'
 import TopMenu from './components/Menu'
 import {
   BrowserRouter as Router,
-  Route
+  Route, withRouter,
 } from 'react-router-dom'
 import { Container } from 'semantic-ui-react'
 
@@ -72,7 +72,8 @@ const App = (props) => {
       url: newUrl
     }
     try {
-      props.createNew(blogObject)
+      await props.createNew(blogObject)
+      await props.initUsers()
       setNewTitle('')
       setNewAuthor('')
       setNewUrl('')
@@ -137,9 +138,7 @@ const App = (props) => {
             <TopMenu />
             <Notification />
 
-            <Route exact path="/" render={() => <Blogs
-              addForm={addForm}
-            />} />
+            <Route exact path="/" render={() => <Blogs />} />
             <Route exact path="/users" render={() => <UsersInfo />} />
             <Route exact path="/users/:id" render={({ match }) =>
               <UserInfo user={userById(match.params.id)} />

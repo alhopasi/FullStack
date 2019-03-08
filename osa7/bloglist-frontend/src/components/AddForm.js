@@ -1,12 +1,11 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import { Form, Button } from 'semantic-ui-react'
 
 const AddForm = (props) => {
+
   return (
     <div>
       <h2>Create new</h2>
-
       <Form onSubmit={props.onSubmit}>
         <Form.Field>
           <label>title</label>
@@ -35,7 +34,7 @@ const AddForm = (props) => {
             onChange={props.onUrlChange}
           />
         </Form.Field>
-        <Button type="submit"><Link to='/'>create</Link></Button>
+        <Button type="submit">create</Button>
       </Form>
     </div>
   )
